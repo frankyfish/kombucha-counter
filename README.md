@@ -1,3 +1,7 @@
+# Kombucha Counter
+
+Angular: v20.0.2 (npm v11.3.0)
+
 
 ## Backend
 

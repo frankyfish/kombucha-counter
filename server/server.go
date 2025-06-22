@@ -26,7 +26,7 @@ func getCurrentCount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-
+	w.Header().Add("Access-Control-Allow-Origin", "*") // CORS for simple request
 	w.Write([]byte(*val))
 }
 
