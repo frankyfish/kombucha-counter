@@ -6,13 +6,14 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class BackendService {
+  private backendUrl = "http://localhost:8080"
   private httpClient = inject(HttpClient)
 
   constructor() { }
 
   getCurrentStats(): Observable<number> {
     console.log("requesting stats from backend")
-    return this.httpClient.get<number>("http://localhost:8080")
+    return this.httpClient.get<number>(this.backendUrl)
   }
 
 }

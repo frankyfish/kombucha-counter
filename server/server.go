@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 )
@@ -11,6 +12,7 @@ var storage KombuchaStorage = NewRedisKombuchaStorage()
 // todo: try with body handling.
 func Start() {
 	http.HandleFunc("/", getCurrentCount)
+	http.HandleFunc("/stats", getCurrentStats)
 	http.HandleFunc("/inc", incCount) // todo: limit to POST
 	server := &http.Server{
 		Addr: ":8080", //todo: make configurable
@@ -28,6 +30,21 @@ func getCurrentCount(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("Access-Control-Allow-Origin", "*") // CORS for simple request
 	w.Write([]byte(*val))
+}
+
+func getCurrentStats(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Request to get all stats: %v\n", r)
+
+	val, err := storage.GetCurrentStats(r.Context())
+
+	if err != nil {
+		panic(err)
+	}
+	w.Header().Add("Access-Control-Allow-Origin", "*") // CORS for simple request
+
+	jsonResponse, err := json.Marshal(val)
+
+	w.Write([]byte(*&jsonResponse))
 }
 
 func incCount(w http.ResponseWriter, r *http.Request) {

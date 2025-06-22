@@ -10,6 +10,6 @@ import { BackendService } from './services/backend-service';
   styleUrl: './app.css'
 })
 export class App {
-  protected title = 'kombucha-ui';
+  protected title = 'Kombucha Counter 🍺';
   private backendService = inject(BackendService) // NOTICE: no provider configured
 }

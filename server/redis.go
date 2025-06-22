@@ -19,6 +19,7 @@ var rdb *redis.Client
 
 type KombuchaStorage interface {
 	GetCurrentCount(ctx context.Context) (*string, error) // using pointer to be able to return no value (nil)
+	GetCurrentStats(ctx context.Context) (*map[string]string, error)
 	IncCount(ctx context.Context) error
 }
 
@@ -44,27 +45,16 @@ func NewRedisKombuchaStorage() *RedisKombuchaStorage {
 		rdb.HSet(ctx, RedisHashName, RedisCountKey, 0) // initializing the value in redis
 	}
 
-	// rdb.FTCreate(
-	// 	ctx,
-	// 	RedisHashName,
-	// 	&redis.CreateIndexOptions{
-	// 		OnHash: true,
-	// 		Prefix: []string{"hkombucha:"},
-	// 	},
-	// 	&redis.FieldSchema{
-	// 		FieldName:
-	// 	}
-	// )
-
 	return &RedisKombuchaStorage{}
 }
 
+// returns current count of Viver Kombucha bottles
 func (ks *RedisKombuchaStorage) GetCurrentCount(ctx context.Context) (*string, error) {
 	val, err := rdb.HGet(ctx, RedisHashName, RedisCountKey).Result()
 
 	switch {
 	case err == redis.Nil:
-		log.Println("key does not exist")
+		log.Printf("key=%s does not exist /n", RedisCountKey)
 		return nil, err
 	case err != nil:
 		log.Println("Get failed", err)
@@ -77,6 +67,26 @@ func (ks *RedisKombuchaStorage) GetCurrentCount(ctx context.Context) (*string, e
 	return &val, nil
 }
 
+func (ks *RedisKombuchaStorage) GetCurrentStats(ctx context.Context) (*map[string]string, error) {
+	val, err := rdb.HGetAll(ctx, RedisHashName).Result()
+
+	switch {
+	case err == redis.Nil:
+		log.Printf("hash=%s does not exist \n", RedisHashName)
+		return nil, err
+	case err != nil:
+		log.Println("Failed to get all values from hash", err)
+		panic(err)
+	case len(val) == 0:
+		log.Printf("hash=%s value is empty \n", RedisHashName)
+		return nil, nil
+	}
+
+	return &val, err
+}
+
+// increases current counter value by one bottle of Viver Kombucha
+// values of ml, price are predefined
 func (ks *RedisKombuchaStorage) IncCount(ctx context.Context) error {
 	// curCount := ks.getCurrentCountAsInt(ctx)
 	// // by default increasing by 330ml which is the size of a standard Viver kombucha bottle
@@ -95,8 +105,8 @@ func (ks *RedisKombuchaStorage) IncCount(ctx context.Context) error {
 		log.Println("Increase Ml failed", err)
 		return err
 	}
-	// todo: currency limitation by int type
-	_, err = rdb.HIncrBy(ctx, RedisHashName, RedisSavedCurrencyKey, 3).Result() // todo: make configurable
+	// todo: currency limitation by int type of Redis Increase function
+	_, err = rdb.HIncrByFloat(ctx, RedisHashName, RedisSavedCurrencyKey, 2.85).Result() // todo: make configurable
 	if err != nil {
 		log.Println("Inc currency save failed", err)
 		return err
@@ -106,23 +116,15 @@ func (ks *RedisKombuchaStorage) IncCount(ctx context.Context) error {
 	return nil
 }
 
-// func (ks *RedisKombuchaStorage) getCurrentCountAsInt(ctx context.Context) int {
-// 	val, err := ks.GetCurrentCount(ctx) // gettting current value
-
-// 	if err != nil {
+// func handleRedisError(err error) {
+// 	switch {
+// 	case err == redis.Nil:
+// 		log.Println("key does not exist")
+// 		return nil, err
+// 	case err != nil:
+// 		log.Println("Get failed", err)
 // 		panic(err)
 // 	}
-
-// 	var curCount int
-// 	iVal, err := strconv.Atoi(*val)
-
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	curCount = iVal
-
-// 	return curCount
 // }
 
 func hashExists(ctx context.Context) bool {
