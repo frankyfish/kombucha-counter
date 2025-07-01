@@ -11,14 +11,18 @@ export class Dashboard {
   private backendService = inject(BackendService)
 
   drinkedBottles: number = 0
+  mlDrank: number = 0
+  moneySaved: number = 0
 
   // loading stats on startup 
   ngOnInit() {
     console.log("running onInit for Dashboard")
     this.backendService.getCurrentStats().subscribe({
       next: (response) => {
-        console.log("number of bottles: ", response)
-        this.drinkedBottles = response
+        console.log("current stats: ", response)
+        this.drinkedBottles = response.count
+        this.mlDrank = response.ml
+        this.moneySaved = response.saved
       }
     })
   }

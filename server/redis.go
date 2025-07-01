@@ -88,13 +88,6 @@ func (ks *RedisKombuchaStorage) GetCurrentStats(ctx context.Context) (*map[strin
 // increases current counter value by one bottle of Viver Kombucha
 // values of ml, price are predefined
 func (ks *RedisKombuchaStorage) IncCount(ctx context.Context) error {
-	// curCount := ks.getCurrentCountAsInt(ctx)
-	// // by default increasing by 330ml which is the size of a standard Viver kombucha bottle
-	// newCount, err := rdb.HSet(
-	// 	ctx,
-	// 	RedisHashName,
-	// 	RedisCountKey, curCount+330).Result() // todo: make configurable
-
 	newCount, err := rdb.HIncrBy(ctx, RedisHashName, RedisCountKey, 1).Result()
 	if err != nil {
 		log.Println("Increase count failed", err)
