@@ -26,4 +26,9 @@ export class BackendService {
     return this.httpClient.get<Stats>(this.backendUrl + "/stats")
   }
 
+  incCount() {
+    console.log("increasing counter")
+    this.httpClient.post(this.backendUrl + "/inc", null).subscribe()
+  }
+
 }

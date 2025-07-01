@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+const CORS_HEADER_NAME = "Access-Control-Allow-Origin"
+
 // https://stackoverflow.com/a/31065973
 var storage KombuchaStorage = NewRedisKombuchaStorage()
 
@@ -28,7 +30,7 @@ func getCurrentCount(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	w.Header().Add("Access-Control-Allow-Origin", "*") // CORS for simple request
+	w.Header().Add(CORS_HEADER_NAME, "*") // CORS for simple request
 	w.Write([]byte(*val))
 }
 
@@ -40,7 +42,7 @@ func getCurrentStats(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	w.Header().Add("Access-Control-Allow-Origin", "*") // CORS for simple request
+	w.Header().Add(CORS_HEADER_NAME, "*") // CORS for simple request
 
 	jsonResponse, err := json.Marshal(val)
 
@@ -49,6 +51,11 @@ func getCurrentStats(w http.ResponseWriter, r *http.Request) {
 
 func incCount(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Increasing. Request: %v\n", r)
+
+	oh := r.Header["Origin"]
+	if oh != nil {
+		w.Header().Add(CORS_HEADER_NAME, oh[0])
+	}
 
 	storage.IncCount(r.Context())
 }
