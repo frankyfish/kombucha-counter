@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { BackendService } from '../services/backend-service';
+import { Counter } from '../counter/counter';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [],
+  imports: [Counter],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -17,6 +18,10 @@ export class Dashboard {
   // loading stats on startup 
   ngOnInit() {
     console.log("running onInit for Dashboard")
+    this.loadStats()
+  }
+
+  private loadStats() {
     this.backendService.getCurrentStats().subscribe({
       next: (response) => {
         console.log("current stats: ", response)
@@ -25,6 +30,10 @@ export class Dashboard {
         this.moneySaved = response.saved
       }
     })
+  }
+
+  onCounterClicked() {
+    this.loadStats()
   }
 
 }
