@@ -2,8 +2,27 @@
 
 Angular: v20.0.2 (npm v11.3.0)
 
+## Deployment
+```
+ng build  # will build to dist/kombucha-ui
+# prepare UI for transfer
+tar -cvf kombucha-ui.tar kombucha-ui/
+# untar on the host
+tar -xvf kombucha-ui.tar kombucha-ui/
+```
+
+### NGINX
+Info: https://nginx.org/en/docs/beginners_guide.html
+
+
 
 ## Backend
+
+### Compilation
+For Raspberry Pi:
+```
+env GOOS=linux GOARCH=arm go build -o kombucha-server main/main.go 
+```
 
 ### Redis
 By convention `<type-of-document>:<id>`.
